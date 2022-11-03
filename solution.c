@@ -3,7 +3,7 @@
 
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
-// char expression[]="((A+B)*(C-(D/E)))";
+// char expression[] = "((A+B)*(C-(D/E)))";
 // char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 char expression[1000];
 
@@ -108,7 +108,7 @@ void lire_expression()
 char *find_left(int index, char string[])
 {
     int nb_letters = count_of(string);
-    int left_nb_letters = index - 1;
+    int left_nb_letters = index;
     int j = 0;
 
     char *left_expression = (char *)malloc(sizeof(char) * left_nb_letters);
@@ -119,6 +119,8 @@ char *find_left(int index, char string[])
         left_expression[j] = string[i];
         j++;
     }
+
+    left_expression[left_nb_letters - 1] = '\0';
 
     int temp_nb_letter = count_of(left_expression);
     int count;
@@ -141,7 +143,7 @@ char *find_right(int index, char string[])
     int nb_letters = count_of(string);
     int j = 0;
 
-    int right_nb_letters = (nb_letters - index + 3);
+    int right_nb_letters = (nb_letters - index - 1);
     char *right_expression = (char *)malloc(sizeof(char) * right_nb_letters);
 
     for (int i = index + 1; i < nb_letters - 1; i++)
@@ -150,24 +152,29 @@ char *find_right(int index, char string[])
         j++;
     }
 
+    right_expression[right_nb_letters - 1] = '\0';
+
     return right_expression;
 }
 
 //-------------------------------- FONCTIONS QUI GENERENT LA TACHE AVEC EXPRESSION --------------------------------//
 
-void generer_noeud(Noeud noeud, int pere)
+void generer_noeud(Noeud noeud)
 {
     // Noeud current_noeud
     // generer_precedences();
     // generer_tache();
+    // sert a afficher
 }
 
 void generer_precedences(Noeud noeud, int pere)
 {
+    // affiche precedences
 }
 
-int genrer_tache(char expression[], Noeud noeud, int operateur_central, int parent)
+int generer_tache(char expression[], Noeud noeud, int operateur_central, int parent)
 {
+    // affiche tache selon les cas
 }
 
 //-------------------------------- FONCTION QUI GENERE L'ARBRE --------------------------------//
@@ -192,7 +199,7 @@ void genere(char expression[], Noeud noeud, int pere)
 int main()
 {
     Noeud tache_0;
-    lire_expression(tache_0);
+    lire_expression();
     genere(expression, tache_0, 0);
 
     return 0;
