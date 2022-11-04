@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
@@ -23,6 +24,9 @@ typedef struct Noeud
     char operateur;
     char *expression_gauche;
     char *expression_droite;
+
+    int e_gauche;
+    int e_droite;
 
 } Noeud;
 
@@ -187,7 +191,17 @@ char *find_right(int index, char string[])
 
 void genrer_noeud(Noeud noeud)
 {
-    printf("Tache M%d = %s %c %s \n", noeud.nom, noeud.expression_gauche, noeud.operateur, noeud.expression_droite);
+    printf("Tache M%d = ", noeud.nom);
+
+    if (noeud.e_gauche > -1)
+        printf("M%d %c ", noeud.e_gauche, noeud.operateur);
+    else
+        printf("%s %c ", noeud.expression_gauche, noeud.operateur);
+
+    if (noeud.e_droite > -1)
+        printf("M%d \n", noeud.e_droite);
+    else
+        printf("%s \n", noeud.expression_droite);
 }
 
 Noeud generer_precedence(Noeud noeud, int pere)
@@ -197,41 +211,66 @@ Noeud generer_precedence(Noeud noeud, int pere)
     return noeud;
 }
 
-Noeud generer_tache(char expression[], Noeud noeud, Operateur operateur_central, int parent)
+Noeud generer_graphe(char expression[], Noeud noeud, Operateur operateur_central, int parent)
 {
     noeud.expression_droite = find_right(operateur_central.index, expression);
     noeud.expression_gauche = find_left(operateur_central.index, expression);
     noeud.operateur = operateur_central.value;
 
     noeud = generer_precedence(noeud, parent);
-    genrer_noeud(noeud);
+    // genrer_noeud(noeud);
 
     return noeud;
+}
+//-------------------------------- FONCTION QUI GENERE UNE TACHE --------------------------------//
+
+void genere_tache()
+{
 }
 
 //-------------------------------- FONCTION QUI GENERE L'ARBRE --------------------------------//
 
-void genere(char expression[], Noeud noeud, int pere)
+Noeud genere(char expression[], Noeud noeud, int pere)
 {
     Operateur op = chercher_ops(expression);
-    Noeud current_node = generer_tache(expression, noeud, op, pere);
+
+    Noeud current_node = generer_graphe(expression, noeud, op, pere);
+
+    Noeud son_node_right;
+    Noeud son_node_left;
+
+    current_node.e_gauche = -1;
+    current_node.e_droite = -1;
+
     int value = 0;
 
     if (is_expression(current_node.expression_gauche))
     {
         value = 1;
-        genere(current_node.expression_gauche, current_node, current_node.nom);
+        son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
+        current_node.e_gauche = son_node_left.nom;
     }
 
     if (is_expression(current_node.expression_droite))
-        genere(current_node.expression_droite, current_node, current_node.nom + value);
+    {
+        son_node_right = genere(current_node.expression_droite, current_node, current_node.nom + value);
+        current_node.e_droite = son_node_right.nom;
+    }
+
+    genrer_noeud(current_node);
+
+    return current_node;
 }
 
 //-------------------------------- FONCTION PRINCIPALE--------------------------------//
 
 int main()
 {
+    //((A+B)*(C-(D/E)))
     Noeud tache_0;
+    tache_0.precedence = 0;
+    tache_0.nom = 1;
+
     lire_expression();
     genere(expression, tache_0, 0);
 
