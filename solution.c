@@ -17,9 +17,12 @@ typedef struct Operateur
 
 typedef struct Noeud
 {
-    Operateur operateur;
     int precedence;
     int nom;
+
+    char operateur;
+    char *expression_gauche;
+    char *expression_droite;
 
 } Noeud;
 
@@ -44,6 +47,29 @@ int is_operator(char letter)
         return 1;
 
     return 0;
+}
+
+//-------------------------------- FONCTION QUI VERIFIE SI C'EST UNE EXPRESSION --------------------------------//
+
+int is_expression(char *string)
+{
+    int nb_letters = count_of(string);
+    int boolean = -1;
+
+    for (int i = 0; i < nb_letters; i++)
+    {
+        if (string[i] == '(')
+            boolean += 1;
+
+        if (string[i] == ')')
+            boolean++;
+    }
+    if (boolean > 0)
+        boolean = 1;
+    else
+        boolean = 0;
+
+    return boolean;
 }
 
 //-------------------------------- FONCTION QUI TROUVE L'OPERATEUR PRINCIPALE --------------------------------//
@@ -159,22 +185,28 @@ char *find_right(int index, char string[])
 
 //-------------------------------- FONCTIONS QUI GENERENT LA TACHE AVEC EXPRESSION --------------------------------//
 
-void generer_noeud(Noeud noeud)
+void genrer_noeud(Noeud noeud)
 {
-    // Noeud current_noeud
-    // generer_precedences();
-    // generer_tache();
-    // sert a afficher
+    printf("Tache M%d = %s %c %s \n", noeud.nom, noeud.expression_gauche, noeud.operateur, noeud.expression_droite);
 }
 
-void generer_precedences(Noeud noeud, int pere)
+Noeud generer_precedence(Noeud noeud, int pere)
 {
-    // affiche precedences
+    noeud.precedence = pere;
+    noeud.nom = pere + 1;
+    return noeud;
 }
 
-int generer_tache(char expression[], Noeud noeud, int operateur_central, int parent)
+Noeud generer_tache(char expression[], Noeud noeud, Operateur operateur_central, int parent)
 {
-    // affiche tache selon les cas
+    noeud.expression_droite = find_right(operateur_central.index, expression);
+    noeud.expression_gauche = find_left(operateur_central.index, expression);
+    noeud.operateur = operateur_central.value;
+
+    noeud = generer_precedence(noeud, parent);
+    genrer_noeud(noeud);
+
+    return noeud;
 }
 
 //-------------------------------- FONCTION QUI GENERE L'ARBRE --------------------------------//
@@ -182,16 +214,17 @@ int generer_tache(char expression[], Noeud noeud, int operateur_central, int par
 void genere(char expression[], Noeud noeud, int pere)
 {
     Operateur op = chercher_ops(expression);
-    printf("Operateur %c , Index : %d \n", op.value, op.index);
+    Noeud current_node = generer_tache(expression, noeud, op, pere);
+    int value = 0;
 
-    char *left_string = find_left(op.index, expression);
-    char *right_string = find_right(op.index, expression);
+    if (is_expression(current_node.expression_gauche))
+    {
+        value = 1;
+        genere(current_node.expression_gauche, current_node, current_node.nom);
+    }
 
-    printf("left : %s \n", left_string);
-    printf("right : %s \n", right_string);
-
-    // int j = generer_tache(expression, noeud, op.index, pere);
-    // generer_precedences(noeud, pere);
+    if (is_expression(current_node.expression_droite))
+        genere(current_node.expression_droite, current_node, current_node.nom + value);
 }
 
 //-------------------------------- FONCTION PRINCIPALE--------------------------------//
