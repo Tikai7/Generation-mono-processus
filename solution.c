@@ -4,9 +4,10 @@
 
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
+int value = 1;
 // char expression[] = "((A+B)*(C-(D/E)))";
-// char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
-char expression[1000];
+char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+// char expression[1000];
 
 //-------------------------------- STRUCTURE DE DONNEES DU PROGRAMME --------------------------------//
 
@@ -14,6 +15,7 @@ typedef struct Operateur
 {
     char value;
     int index;
+
 } Operateur;
 
 typedef struct Noeud
@@ -189,7 +191,7 @@ char *find_right(int index, char string[])
 
 //-------------------------------- FONCTIONS QUI GENERENT LA TACHE AVEC EXPRESSION --------------------------------//
 
-void genrer_noeud(Noeud noeud)
+void genere_tache(Noeud noeud)
 {
     printf("Tache M%d = ", noeud.nom);
 
@@ -202,30 +204,19 @@ void genrer_noeud(Noeud noeud)
         printf("M%d \n", noeud.e_droite);
     else
         printf("%s \n", noeud.expression_droite);
+
+    if (noeud.precedence != 0)
+        printf("T%d < T%d \n", noeud.nom, noeud.precedence);
+    else
+        printf("T%d est le noeud initial \n", noeud.nom);
 }
 
 Noeud generer_precedence(Noeud noeud, int pere)
 {
     noeud.precedence = pere;
-    noeud.nom = pere + 1;
+    noeud.nom = value;
+    value += 1;
     return noeud;
-}
-
-Noeud generer_graphe(char expression[], Noeud noeud, Operateur operateur_central, int parent)
-{
-    noeud.expression_droite = find_right(operateur_central.index, expression);
-    noeud.expression_gauche = find_left(operateur_central.index, expression);
-    noeud.operateur = operateur_central.value;
-
-    noeud = generer_precedence(noeud, parent);
-    // genrer_noeud(noeud);
-
-    return noeud;
-}
-//-------------------------------- FONCTION QUI GENERE UNE TACHE --------------------------------//
-
-void genere_tache()
-{
 }
 
 //-------------------------------- FONCTION QUI GENERE L'ARBRE --------------------------------//
@@ -234,7 +225,12 @@ Noeud genere(char expression[], Noeud noeud, int pere)
 {
     Operateur op = chercher_ops(expression);
 
-    Noeud current_node = generer_graphe(expression, noeud, op, pere);
+    Noeud current_node;
+    current_node.expression_droite = find_right(op.index, expression);
+    current_node.expression_gauche = find_left(op.index, expression);
+    current_node.operateur = op.value;
+
+    current_node = generer_precedence(current_node, pere);
 
     Noeud son_node_right;
     Noeud son_node_left;
@@ -257,7 +253,7 @@ Noeud genere(char expression[], Noeud noeud, int pere)
         current_node.e_droite = son_node_right.nom;
     }
 
-    genrer_noeud(current_node);
+    genere_tache(current_node);
 
     return current_node;
 }
@@ -271,7 +267,7 @@ int main()
     tache_0.precedence = 0;
     tache_0.nom = 1;
 
-    lire_expression();
+    // lire_expression();
     genere(expression, tache_0, 0);
 
     return 0;
