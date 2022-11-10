@@ -242,8 +242,6 @@ Noeud genere(char expression[], Noeud noeud, int pere)
     current_node.e_gauche = -1;
     current_node.e_droite = -1;
 
-    int value = 0;
-
     pid = fork();
     if (pid == 0)
         current_son = 1;
@@ -255,7 +253,6 @@ Noeud genere(char expression[], Noeud noeud, int pere)
 
     if (is_expression(current_node.expression_gauche) && pid == 0 && current_son == 1)
     {
-        value = 1;
         son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
         current_node.e_gauche = son_node_left.nom;
         exit(0);
@@ -267,10 +264,12 @@ Noeud genere(char expression[], Noeud noeud, int pere)
         current_node.e_droite = son_node_right.nom;
         exit(0);
     }
-    while (wait(0) > 0)
+    while (wait(NULL) > 0)
     {
     };
-    genere_tache(current_node);
+
+    if (pid != 0)
+        genere_tache(current_node);
 
     return current_node;
 }
