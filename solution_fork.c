@@ -6,8 +6,8 @@
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
 int value = 1;
-char expression[] = "((A+B)*(C-(D/E)))";
-// char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+// char expression[] = "((A+B)*(C-(D/E)))";
+char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 // char expression[1000];
 
 //-------------------------------- STRUCTURE DE DONNEES DU PROGRAMME --------------------------------//
@@ -242,17 +242,34 @@ Noeud genere(char expression[], Noeud noeud, int pere)
     current_node.e_gauche = -1;
     current_node.e_droite = -1;
 
-    if (is_expression(current_node.expression_gauche))
+    int value = 0;
+
+    pid = fork();
+    if (pid == 0)
+        current_son = 1;
+    else
     {
-        son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
-        current_node.e_gauche = son_node_left.nom;
+        pid = fork();
+        current_son = 2;
     }
 
-    if (is_expression(current_node.expression_droite))
+    if (is_expression(current_node.expression_gauche) && pid == 0 && current_son == 1)
+    {
+        value = 1;
+        son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
+        current_node.e_gauche = son_node_left.nom;
+        exit(0);
+    }
+
+    if (is_expression(current_node.expression_droite) && pid == 0 && current_son == 2)
     {
         son_node_right = genere(current_node.expression_droite, current_node, current_node.nom + value);
         current_node.e_droite = son_node_right.nom;
+        exit(0);
     }
+    while (wait(0) > 0)
+    {
+    };
     genere_tache(current_node);
 
     return current_node;
