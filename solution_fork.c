@@ -79,6 +79,20 @@ int is_expression(char *string)
     return boolean;
 }
 
+//-------------------------------- FONCTION QUI TROUVE LE NOMBRE D'OPERATEUR  --------------------------------//
+
+int number_operateur(char string[])
+{
+    int nb_operateurs = 0;
+    int nb_letters = count_of(string);
+
+    for (int i = 0; i < nb_letters; i++)
+    {
+        if (is_operator(string[i]))
+            nb_operateurs++;
+    }
+    return nb_operateurs;
+}
 //-------------------------------- FONCTION QUI TROUVE L'OPERATEUR PRINCIPALE --------------------------------//
 
 Operateur chercher_ops(char string[])
@@ -243,27 +257,29 @@ Noeud genere(char expression[], Noeud noeud, int pere)
     current_node.e_droite = -1;
 
     pid = fork();
-    if (pid == 0)
-        current_son = 1;
-    else
-    {
-        pid = fork();
-        current_son = 2;
-    }
-
-    if (is_expression(current_node.expression_gauche) && pid == 0 && current_son == 1)
+    if (is_expression(current_node.expression_gauche) && pid == 0)
     {
         son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
         current_node.e_gauche = son_node_left.nom;
         exit(0);
     }
 
+    int nom_fils_gauche = number_operateur(current_node.expression_gauche);
+    if (nom_fils_gauche != 0)
+        current_node.e_gauche = nom_fils_gauche + current_node.nom;
+
+    pid = fork();
     if (is_expression(current_node.expression_droite) && pid == 0 && current_son == 2)
     {
         son_node_right = genere(current_node.expression_droite, current_node, current_node.nom + value);
         current_node.e_droite = son_node_right.nom;
         exit(0);
     }
+
+    int nom_fils_droit = number_operateur(current_node.expression_droite);
+    if (nom_fils_droit != 0)
+        current_node.e_droite = nom_fils_gauche + current_node.nom + 1;
+
     while (wait(NULL) > 0)
     {
     };

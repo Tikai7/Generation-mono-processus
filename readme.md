@@ -30,3 +30,7 @@ T2<T1 ; T3<T1 ; T4<T3.
   Puis génère la précédence avec la tache générée dans la fonction appelante s’il y a lieu. Dans l’exemple ci-dessus et pour l’expression entière, la tache correspondante à l’opération ‘*’ (T1) n’a pas de tache qui la précède. Par contre, lors du traitement concernant l’opération ‘+’, sa tache correspondante (i.e. T2) précède T1 (i.e. T2<T1 est donc générée). 
 
   En conclusion, il y a autant d’appels à la fonction génère () que d’opérations dans l’expression. 
+
+# Génération parallèle  
+
+  Dans les appels récursifs précédents, les deux appels sur les sous formules sont logiquement indépendants. Ils peuvent donc être réalisés par deux processus différents, ce qui fournit un schéma de parallélisation de notre générateur. Donc, pour réaliser le travail demandé, le processus père crée deux processus fils dont chacun se charge d’une sous expression, attend leurs terminaisons, achève son travail et conclue. Finalement, il y a autant de processus que d’opération dans l’expression. 

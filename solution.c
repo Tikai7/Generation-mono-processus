@@ -6,8 +6,8 @@
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
 int value = 1;
-char expression[] = "((A+B)*(C-(D/E)))";
-// char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
+// char expression[] = "((A+B)*(C-(D/E)))";
+char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 // char expression[1000];
 
 //-------------------------------- STRUCTURE DE DONNEES DU PROGRAMME --------------------------------//
@@ -78,7 +78,20 @@ int is_expression(char *string)
 
     return boolean;
 }
+//-------------------------------- FONCTION QUI TROUVE LE NOMBRE D'OPERATEUR  --------------------------------//
 
+int number_operateur(char string[])
+{
+    int nb_operateurs = 0;
+    int nb_letters = count_of(string);
+
+    for (int i = 0; i < nb_letters; i++)
+    {
+        if (is_operator(string[i]))
+            nb_operateurs++;
+    }
+    return nb_operateurs;
+}
 //-------------------------------- FONCTION QUI TROUVE L'OPERATEUR PRINCIPALE --------------------------------//
 
 Operateur chercher_ops(char string[])
@@ -245,14 +258,23 @@ Noeud genere(char expression[], Noeud noeud, int pere)
     if (is_expression(current_node.expression_gauche))
     {
         son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
-        current_node.e_gauche = son_node_left.nom;
+        // current_node.e_gauche = son_node_left.nom;
     }
+
+    int nom_fils_gauche = number_operateur(current_node.expression_gauche);
+    if (nom_fils_gauche != 0)
+        current_node.e_gauche = nom_fils_gauche + current_node.nom;
 
     if (is_expression(current_node.expression_droite))
     {
         son_node_right = genere(current_node.expression_droite, current_node, current_node.nom + value);
-        current_node.e_droite = son_node_right.nom;
+        // current_node.e_droite = son_node_right.nom;
     }
+
+    int nom_fils_droit = number_operateur(current_node.expression_droite);
+    if (nom_fils_droit != 0)
+        current_node.e_droite = nom_fils_gauche + current_node.nom + 1;
+
     genere_tache(current_node);
 
     return current_node;
