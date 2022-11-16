@@ -280,6 +280,7 @@ int main()
 
     // lire_expression();
     genere(expression, tache_0, 0);
+    printf("%d\n", value);
 
     return 0;
 }

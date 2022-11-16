@@ -5,7 +5,6 @@
 
 //-------------------------------- VARIABLE GLOBALE EXPRESSION --------------------------------//
 
-int value = 1;
 // char expression[] = "((A+B)*(C-(D/E)))";
 char expression[] = "(((A+B)*C)-(((D-(F/G))*(H+(K*L)))/((M-N)*O)))";
 // char expression[1000];
@@ -226,29 +225,26 @@ void genere_tache(Noeud noeud)
         printf("T%d est le noeud initial \n", noeud.nom);
 }
 
-Noeud generer_precedence(Noeud noeud, int pere)
+Noeud generer_precedence(Noeud noeud, int pere, int value)
 {
     noeud.precedence = pere;
     noeud.nom = value;
-    value += 1;
     return noeud;
 }
 
 //-------------------------------- FONCTION QUI GENERE L'ARBRE --------------------------------//
 
-Noeud genere(char expression[], Noeud noeud, int pere)
+Noeud genere(char expression[], Noeud noeud, int pere, int value)
 {
     Operateur op = chercher_ops(expression);
-    pid_t pid;
-    int son_left;
-    int current_son = 0;
+    pid_t pid, pid_2;
 
     Noeud current_node;
     current_node.expression_droite = find_right(op.index, expression);
     current_node.expression_gauche = find_left(op.index, expression);
     current_node.operateur = op.value;
 
-    current_node = generer_precedence(current_node, pere);
+    current_node = generer_precedence(current_node, pere, value);
 
     Noeud son_node_right;
     Noeud son_node_left;
@@ -256,35 +252,41 @@ Noeud genere(char expression[], Noeud noeud, int pere)
     current_node.e_gauche = -1;
     current_node.e_droite = -1;
 
+    value++;
+    if (is_expression(current_node.expression_gauche))
+        current_node.e_gauche = value;
+
     pid = fork();
     if (is_expression(current_node.expression_gauche) && pid == 0)
     {
-        son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom);
-        current_node.e_gauche = son_node_left.nom;
-        exit(0);
+        son_node_left = genere(current_node.expression_gauche, current_node, current_node.nom, value);
+        exit(EXIT_SUCCESS);
     }
 
-    int nom_fils_gauche = number_operateur(current_node.expression_gauche);
-    if (nom_fils_gauche != 0)
-        current_node.e_gauche = nom_fils_gauche + current_node.nom;
+    if (pid == 0)
+        exit(EXIT_SUCCESS);
 
-    pid = fork();
-    if (is_expression(current_node.expression_droite) && pid == 0 && current_son == 2)
+    if (is_expression(current_node.expression_droite))
     {
-        son_node_right = genere(current_node.expression_droite, current_node, current_node.nom + value);
-        current_node.e_droite = son_node_right.nom;
-        exit(0);
+        value = number_operateur(current_node.expression_gauche) + current_node.nom + 1;
+        current_node.e_droite = value;
     }
 
-    int nom_fils_droit = number_operateur(current_node.expression_droite);
-    if (nom_fils_droit != 0)
-        current_node.e_droite = nom_fils_gauche + current_node.nom + 1;
+    pid_2 = fork();
+    if (is_expression(current_node.expression_droite) && pid_2 == 0)
+    {
+        son_node_right = genere(current_node.expression_droite, current_node, current_node.nom, value);
+        exit(EXIT_SUCCESS);
+    }
+
+    if (pid_2 == 0)
+        exit(EXIT_SUCCESS);
 
     while (wait(NULL) > 0)
     {
     };
 
-    if (pid != 0)
+    if (pid != 0 && pid_2 != 0)
         genere_tache(current_node);
 
     return current_node;
@@ -295,12 +297,13 @@ Noeud genere(char expression[], Noeud noeud, int pere)
 int main()
 {
     //((A+B)*(C-(D/E)))
+    int value = 1;
     Noeud tache_0;
     tache_0.precedence = 0;
     tache_0.nom = 1;
 
     // lire_expression();
-    genere(expression, tache_0, 0);
+    genere(expression, tache_0, 0, value);
 
     return 0;
 }
